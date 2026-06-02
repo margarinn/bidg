@@ -4,7 +4,7 @@ import pandas as pd
 import os
 from fastapi.middleware.cors import CORSMiddleware
 
-app = FastAPI(title="Analytics API")
+app = FastAPI(title="API Analitik")
 
 # Enable CORS for React frontend
 app.add_middleware(

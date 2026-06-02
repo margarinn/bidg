@@ -44,14 +44,14 @@ const App: React.FC = () => {
         echarts.registerMap('brazil', json);
         setMapLoaded(true);
       })
-      .catch(err => console.error('Map Load Error:', err));
+      .catch(err => console.error('Kesalahan Pemuatan Peta:', err));
   }, []);
 
   const elbowOption = {
-    title: { text: 'Elbow Method for Optimal K', left: 'center' },
+    title: { text: 'Metode Elbow untuk K Optimal', left: 'center' },
     tooltip: { trigger: 'axis' },
-    xAxis: { name: 'Number of Clusters (k)', type: 'category', data: elbowData?.k ?? [] },
-    yAxis: { name: 'Inertia', type: 'value' },
+    xAxis: { name: 'Jumlah Klaster (k)', type: 'category', data: elbowData?.k ?? [] },
+    yAxis: { name: 'Inersia', type: 'value' },
     series: [
       {
         data: elbowData?.inertia ?? [],
@@ -64,24 +64,24 @@ const App: React.FC = () => {
   };
 
   const geoOption = {
-    title: { text: 'Sales Density by State', left: 'center' },
-    tooltip: { trigger: 'item', formatter: '{b}<br/>Revenue: ${c}' },
+    title: { text: 'Densitas Penjualan per Negara Bagian', left: 'center' },
+    tooltip: { trigger: 'item', formatter: '{b}<br/>Pendapatan: ${c}' },
     visualMap: {
       min: 0,
       max: 1000000,
       left: 'left',
       top: 'bottom',
-      text: ['High', 'Low'],
+      text: ['Tinggi', 'Rendah'],
       calculable: true,
       inRange: { color: ['#e0f2fe', '#4f46e5', '#312e81'] }
     },
     series: [
       {
-        name: 'Revenue',
+        name: 'Pendapatan',
         type: 'map',
         map: 'brazil',
         roam: true,
-        nameProperty: 'sigla', // Match data name with GeoJSON 'sigla' property
+        nameProperty: 'sigla',
         emphasis: { label: { show: true } },
         data: geoData.map(d => ({ name: d.customer_state, value: d.value }))
       }
@@ -89,51 +89,51 @@ const App: React.FC = () => {
   };
 
   const scatterOption = {
-    title: { text: 'Customer Segmentation (K-Means)', left: 'center' },
+    title: { text: 'Segmentasi Pelanggan (K-Means)', left: 'center' },
     tooltip: { trigger: 'item' },
-    legend: { bottom: '0', data: ['Tier 1', 'Tier 2', 'Tier 3'] },
-    xAxis: { name: 'Transactions', type: 'value' },
-    yAxis: { name: 'Payments', type: 'value' },
+    legend: { bottom: '0', data: ['Tingkat 1', 'Tingkat 2', 'Tingkat 3'] },
+    xAxis: { name: 'Transaksi', type: 'value' },
+    yAxis: { name: 'Pembayaran', type: 'value' },
     series: [
       {
-        name: 'Tier 3',
+        name: 'Tingkat 3',
         symbolSize: 5,
         data: Array.isArray(clusterData) ? clusterData.filter(d => d.cluster === 0).map(d => [d.total_transaction_customer, d.total_payment_customer]) : [],
         type: 'scatter',
-        itemStyle: { color: '#3b82f6' } // Blue-500
+        itemStyle: { color: '#3b82f6' }
       },
       {
-        name: 'Tier 2',
+        name: 'Tingkat 2',
         symbolSize: 5,
         data: Array.isArray(clusterData) ? clusterData.filter(d => d.cluster === 1).map(d => [d.total_transaction_customer, d.total_payment_customer]) : [],
         type: 'scatter',
-        itemStyle: { color: '#64748b' } // Slate-500
+        itemStyle: { color: '#64748b' }
       },
       {
-        name: 'Tier 1',
+        name: 'Tingkat 1',
         symbolSize: 5,
         data: Array.isArray(clusterData) ? clusterData.filter(d => d.cluster === 2).map(d => [d.total_transaction_customer, d.total_payment_customer]) : [],
         type: 'scatter',
-        itemStyle: { color: '#312e81' } // Indigo-900
+        itemStyle: { color: '#312e81' }
       }
     ]
   };
 
   const insightLoyaltyOption = {
-    title: { text: 'Tier 3 Behavior (Loyalty Split)', left: 'center' },
+    title: { text: 'Perilaku Tingkat 3 (Pemisahan Loyalitas)', left: 'center' },
     tooltip: { trigger: 'item' },
     series: [
       {
         type: 'pie',
         radius: ['40%', '70%'],
-        data: kpi?.loyalty_split.map(d => ({ name: d.status, value: d.count })) ?? [],
+        data: kpi?.loyalty_split.map(d => ({ name: d.status === 'One-time' ? 'Sekali Beli' : 'Berulang', value: d.count })) ?? [],
         emphasis: { itemStyle: { shadowBlur: 10, shadowOffsetX: 0, shadowColor: 'rgba(0, 0, 0, 0.5)' } }
       }
     ]
   };
 
   const insightRegionalOption = {
-    title: { text: 'Top 5 Regional Performance', left: 'center' },
+    title: { text: '5 Performa Regional Teratas', left: 'center' },
     tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
     xAxis: { type: 'category', data: geoData.sort((a,b) => b.value - a.value).slice(0,5).map(d => d.customer_state) },
     yAxis: { type: 'value' },
@@ -141,13 +141,13 @@ const App: React.FC = () => {
   };
 
   const insightRevenueOption = {
-    title: { text: 'Revenue Impact by Tier', left: 'center' },
+    title: { text: 'Dampak Pendapatan per Tingkat', left: 'center' },
     tooltip: { trigger: 'item' },
     series: [
       {
         type: 'pie',
         radius: '50%',
-        data: kpi?.revenue_by_tier.map(d => ({ name: d.name, value: d.value })) ?? [],
+        data: kpi?.revenue_by_tier.map(d => ({ name: d.name.replace('Tier', 'Tingkat'), value: d.value })) ?? [],
         emphasis: { itemStyle: { shadowBlur: 10, shadowOffsetX: 0, shadowColor: 'rgba(0, 0, 0, 0.5)' } }
       }
     ]
@@ -160,63 +160,63 @@ const App: React.FC = () => {
 
   return (
     <div className="flex h-screen bg-slate-50">
-      {/* Sidebar */}
+      {/* Bilah Samping */}
       <aside className="w-64 bg-slate-900 text-white flex flex-col">
-        <div className="p-6 text-xl font-bold border-b border-slate-800">Analytics</div>
+        <div className="p-6 text-xl font-bold border-b border-slate-800">Analitik</div>
         <nav className="flex-1 p-4 space-y-2">
           <div className={navItemClass('dashboard')} onClick={() => setView('dashboard')}>
             <LayoutDashboard size={20} />
-            <span>Dashboard</span>
+            <span>Dasbor</span>
           </div>
           <div className={navItemClass('clusters')} onClick={() => setView('clusters')}>
             <BarChart3 size={20} />
-            <span>Clusters</span>
+            <span>Klaster</span>
           </div>
           <div className={navItemClass('geospatial')} onClick={() => setView('geospatial')}>
             <MapIcon size={20} />
-            <span>Geospatial</span>
+            <span>Geospasial</span>
           </div>
           <div className={navItemClass('optimality')} onClick={() => setView('optimality')}>
             <Info size={20} />
-            <span>Optimality</span>
+            <span>Optimasi</span>
           </div>
           <div className={navItemClass('insights')} onClick={() => setView('insights')}>
             <Lightbulb size={20} />
-            <span>Insights</span>
+            <span>Wawasan</span>
           </div>
         </nav>
         <div className="p-6 border-t border-slate-800 text-xs text-slate-500">
-          v1.0.0-corporate
+          v1.0.0-korporat
         </div>
       </aside>
 
-      {/* Main Content */}
+      {/* Konten Utama */}
       <main className="flex-1 overflow-y-auto p-8">
         {view === 'dashboard' && (
           <>
             <header className="mb-8">
-              <h1 className="text-2xl font-bold text-slate-900">Enterprise Overview</h1>
-              <p className="text-slate-500">Real-time business intelligence.</p>
+              <h1 className="text-2xl font-bold text-slate-900">Ikhtisar Perusahaan</h1>
+              <p className="text-slate-500">Intelijen bisnis waktu nyata.</p>
             </header>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
               <div className="bg-white p-6 rounded-lg border border-slate-200 shadow-sm">
                 <div className="flex items-center justify-between mb-4">
-                  <span className="text-slate-500 font-medium">Total Revenue</span>
+                  <span className="text-slate-500 font-medium">Total Pendapatan</span>
                   <ShoppingCart className="text-indigo-600" size={20} />
                 </div>
                 <div className="text-3xl font-bold">${kpi?.total_revenue.toLocaleString() ?? '...'}</div>
               </div>
               <div className="bg-white p-6 rounded-lg border border-slate-200 shadow-sm">
                 <div className="flex items-center justify-between mb-4">
-                  <span className="text-slate-500 font-medium">Unique Customers</span>
+                  <span className="text-slate-500 font-medium">Pelanggan Unik</span>
                   <Users className="text-indigo-600" size={20} />
                 </div>
                 <div className="text-3xl font-bold">{kpi?.total_customers.toLocaleString() ?? '...'}</div>
               </div>
               <div className="bg-white p-6 rounded-lg border border-slate-200 shadow-sm">
                 <div className="flex items-center justify-between mb-4">
-                  <span className="text-slate-500 font-medium">Total Orders</span>
+                  <span className="text-slate-500 font-medium">Total Pesanan</span>
                   <LayoutDashboard className="text-indigo-600" size={20} />
                 </div>
                 <div className="text-3xl font-bold">{kpi?.total_orders.toLocaleString() ?? '...'}</div>
@@ -227,7 +227,7 @@ const App: React.FC = () => {
               {mapLoaded ? (
                 <ReactECharts option={geoOption} style={{ height: '100%' }} />
               ) : (
-                <div className="flex items-center justify-center h-full text-slate-400">Loading Map...</div>
+                <div className="flex items-center justify-center h-full text-slate-400">Memuat Peta...</div>
               )}
             </div>
           </>
@@ -236,8 +236,8 @@ const App: React.FC = () => {
         {view === 'clusters' && (
           <div className="h-full">
             <header className="mb-8">
-              <h1 className="text-2xl font-bold text-slate-900">Advanced Cluster Analysis</h1>
-              <p className="text-slate-500">In-depth behavioral segmentation using K-Means logic.</p>
+              <h1 className="text-2xl font-bold text-slate-900">Analisis Klaster Lanjutan</h1>
+              <p className="text-slate-500">Segmentasi perilaku mendalam menggunakan logika K-Means.</p>
             </header>
             <div className="bg-white p-6 rounded-lg border border-slate-200 shadow-sm h-5/6">
               <ReactECharts option={scatterOption} style={{ height: '100%' }} />
@@ -248,14 +248,14 @@ const App: React.FC = () => {
         {view === 'geospatial' && (
           <div className="h-full">
             <header className="mb-8">
-              <h1 className="text-2xl font-bold text-slate-900">Geospatial Distribution</h1>
-              <p className="text-slate-500">Sales density across Brazilian states.</p>
+              <h1 className="text-2xl font-bold text-slate-900">Distribusi Geospasial</h1>
+              <p className="text-slate-500">Densitas penjualan di seluruh negara bagian Brasil.</p>
             </header>
             <div className="bg-white p-6 rounded-lg border border-slate-200 shadow-sm h-5/6">
               {mapLoaded ? (
                 <ReactECharts option={geoOption} style={{ height: '100%' }} />
               ) : (
-                <div className="flex items-center justify-center h-full text-slate-400">Loading Map...</div>
+                <div className="flex items-center justify-center h-full text-slate-400">Memuat Peta...</div>
               )}
             </div>
           </div>
@@ -264,14 +264,14 @@ const App: React.FC = () => {
         {view === 'optimality' && (
           <div className="h-full">
             <header className="mb-8">
-              <h1 className="text-2xl font-bold text-slate-900">Model Optimization</h1>
-              <p className="text-slate-500">Determining the ideal number of clusters using the Elbow Method.</p>
+              <h1 className="text-2xl font-bold text-slate-900">Optimasi Model</h1>
+              <p className="text-slate-500">Menentukan jumlah klaster ideal menggunakan Metode Elbow.</p>
             </header>
             <div className="bg-white p-6 rounded-lg border border-slate-200 shadow-sm h-5/6">
               {elbowData ? (
                 <ReactECharts option={elbowOption} style={{ height: '100%' }} />
               ) : (
-                <div className="flex items-center justify-center h-full text-slate-400">Loading Model Metrics...</div>
+                <div className="flex items-center justify-center h-full text-slate-400">Memuat Metrik Model...</div>
               )}
             </div>
           </div>
@@ -280,8 +280,8 @@ const App: React.FC = () => {
         {view === 'insights' && (
           <div className="space-y-8">
             <header>
-              <h1 className="text-2xl font-bold text-slate-900">Strategic Insights</h1>
-              <p className="text-slate-500">Data-driven conclusions and mathematical evidence.</p>
+              <h1 className="text-2xl font-bold text-slate-900">Wawasan Strategis</h1>
+              <p className="text-slate-500">Kesimpulan berbasis data dan bukti matematis.</p>
             </header>
 
             <div className="grid grid-cols-1 gap-8">
@@ -289,13 +289,13 @@ const App: React.FC = () => {
               <div className="bg-white p-8 rounded-lg border border-slate-200 shadow-sm">
                 <div className="flex flex-col lg:flex-row items-center gap-8">
                   <div className="flex-1">
-                    <h3 className="text-xl font-bold text-slate-900 mb-4">Tier 3 Behavior Analysis</h3>
+                    <h3 className="text-xl font-bold text-slate-900 mb-4">Analisis Perilaku Tingkat 3</h3>
                     <p className="text-slate-600 mb-4">
-                      Mathematical evidence shows that Tier 3 customers are predominantly one-time buyers (97.3%). 
-                      This segment represents the greatest opportunity for conversion into recurring revenue streams.
+                      Bukti matematis menunjukkan bahwa pelanggan Tingkat 3 didominasi oleh pembeli satu kali (97,3%). 
+                      Segmen ini mewakili peluang terbesar untuk konversi menjadi aliran pendapatan berulang.
                     </p>
                     <div className="bg-slate-50 p-4 rounded border border-slate-100 text-sm text-slate-700">
-                      Strategy: Implement automated follow-up sequences for first-time Tier 3 buyers.
+                      Strategi: Terapkan urutan tindak lanjut otomatis untuk pembeli Tingkat 3 pertama kali.
                     </div>
                   </div>
                   <div className="w-full lg:w-96 h-64">
@@ -308,13 +308,13 @@ const App: React.FC = () => {
               <div className="bg-white p-8 rounded-lg border border-slate-200 shadow-sm">
                 <div className="flex flex-col lg:flex-row items-center gap-8">
                   <div className="flex-1">
-                    <h3 className="text-xl font-bold text-slate-900 mb-4">Regional Distribution Logic</h3>
+                    <h3 className="text-xl font-bold text-slate-900 mb-4">Logika Distribusi Regional</h3>
                     <p className="text-slate-600 mb-4">
-                      The Southeast region accounts for nearly 20% of total revenue. 
-                      Scaling efficiency requires diversifying performance across the top 5 high-density states identified.
+                      Wilayah Tenggara menyumbang hampir 20% dari total pendapatan. 
+                      Skalasi efisiensi memerlukan diversifikasi performa di 5 negara bagian dengan densitas tinggi yang teridentifikasi.
                     </p>
                     <div className="bg-slate-50 p-4 rounded border border-slate-100 text-sm text-slate-700">
-                      Strategy: Deploy localized marketing campaigns in SP, RJ, and MG to solidify market share.
+                      Strategi: Kerahkan kampanye pemasaran lokal di SP, RJ, dan MG untuk memperkuat pangsa pasar.
                     </div>
                   </div>
                   <div className="w-full lg:w-96 h-64">
@@ -327,13 +327,13 @@ const App: React.FC = () => {
               <div className="bg-white p-8 rounded-lg border border-slate-200 shadow-sm">
                 <div className="flex flex-col lg:flex-row items-center gap-8">
                   <div className="flex-1">
-                    <h3 className="text-xl font-bold text-slate-900 mb-4">Tier 1 Revenue Impact</h3>
+                    <h3 className="text-xl font-bold text-slate-900 mb-4">Dampak Pendapatan Tingkat 1</h3>
                     <p className="text-slate-600 mb-4">
-                      Although Tier 1 customers comprise less than 1% of the total base, their revenue impact is exponentially higher (12.4%). 
-                      Segment health is directly tied to the retention of this top-tier group.
+                      Meskipun pelanggan Tingkat 1 mencakup kurang dari 1% dari total basis, dampak pendapatan mereka secara eksponensial lebih tinggi (12,4%). 
+                      Kesehatan segmen terkait langsung dengan retensi kelompok tingkat atas ini.
                     </p>
                     <div className="bg-slate-50 p-4 rounded border border-slate-100 text-sm text-slate-700">
-                      Strategy: Establish a dedicated support channel for Tier 1 transaction issues.
+                      Strategi: Tetapkan saluran dukungan khusus untuk masalah transaksi Tingkat 1.
                     </div>
                   </div>
                   <div className="w-full lg:w-96 h-64">

@@ -1,30 +1,30 @@
-# Analytics Showcase
+# Pertunjukan Analitik (Analytics Showcase)
 
-An interactive big data visualization platform for e-commerce analytics.
+Platform visualisasi data besar interaktif untuk analitik e-commerce.
 
-## Features
-- **Dashboard:** Real-time business intelligence with core KPIs.
-- **Customer Segmentation:** High-performance visualization of behavioral clusters using K-Means logic.
-- **Geospatial Analysis:** Sales density across geographical regions (Brazil).
+## Fitur Utama
+- **Dasbor:** Intelijen bisnis waktu nyata dengan metrik KPI utama.
+- **Segmentasi Pelanggan:** Visualisasi performa tinggi untuk klaster perilaku menggunakan logika K-Means.
+- **Analisis Geospasial:** Densitas penjualan di seluruh wilayah geografis (Brasil).
 
-## Tech Stack
+## Tumpukan Teknologi (Tech Stack)
 - **Frontend:** React, TypeScript, Vite, TailwindCSS, Apache ECharts.
 - **Backend:** FastAPI, Python, SQLite, Pandas.
-- **Deployment:** Nginx, Cloudflare Tunnels.
+- **Implementasi:** Nginx, Cloudflare Tunnels.
 
-## Getting Started
+## Panduan Penggunaan
 
-### Backend
+### Modul Backend
 1. `cd backend`
 2. `python -m venv venv`
 3. `source venv/bin/activate`
 4. `pip install -r requirements.txt`
 5. `python app/main.py`
 
-### Frontend
+### Modul Frontend
 1. `cd frontend`
 2. `npm install`
 3. `npm run dev`
 
 ---
-*Maintained as part of the Antigravity Project Suite.*
+*Dikelola sebagai bagian dari Unit Proyek Antigravity.*
