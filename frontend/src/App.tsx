@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { LayoutDashboard, Users, ShoppingCart, BarChart3, Map as MapIcon, Info } from 'lucide-react';
+import { LayoutDashboard, Users, ShoppingCart, BarChart3, Map as MapIcon, Info, Lightbulb } from 'lucide-react';
 import ReactECharts from 'echarts-for-react';
 
 interface KPI {
@@ -22,7 +22,7 @@ interface ElbowData {
 }
 
 const App: React.FC = () => {
-  const [view, setView] = useState<'dashboard' | 'clusters' | 'geospatial' | 'optimality'>('dashboard');
+  const [view, setView] = useState<'dashboard' | 'clusters' | 'geospatial' | 'optimality' | 'insights'>('dashboard');
   const [kpi, setKpi] = useState<KPI | null>(null);
   const [clusterData, setClusterData] = useState<any[]>([]);
   const [geoData, setGeoData] = useState<GeoData[]>([]);
@@ -144,6 +144,10 @@ const App: React.FC = () => {
             <Info size={20} />
             <span>Optimality</span>
           </div>
+          <div className={navItemClass('insights')} onClick={() => setView('insights')}>
+            <Lightbulb size={20} />
+            <span>Insights</span>
+          </div>
         </nav>
         <div className="p-6 border-t border-slate-800 text-xs text-slate-500">
           v1.0.0-corporate
@@ -233,6 +237,74 @@ const App: React.FC = () => {
               ) : (
                 <div className="flex items-center justify-center h-full text-slate-400">Loading Model Metrics...</div>
               )}
+            </div>
+          </div>
+        )}
+
+        {view === 'insights' && (
+          <div className="space-y-8">
+            <header>
+              <h1 className="text-2xl font-bold text-slate-900">Strategic Insights</h1>
+              <p className="text-slate-500">Data-driven conclusions and recommended business actions.</p>
+            </header>
+
+            <div className="grid grid-cols-1 gap-6">
+              {/* Insight 1 */}
+              <div className="bg-white p-8 rounded-lg border border-slate-200 shadow-sm">
+                <div className="flex items-start space-x-4">
+                  <div className="p-3 bg-red-100 rounded-full text-red-600">
+                    <Users size={24} />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-xl font-bold text-slate-900 mb-2">The Retention Crisis</h3>
+                    <p className="text-slate-600 mb-4">
+                      The analysis reveals that <strong>97.3%</strong> of the customer base consists of one-time buyers. 
+                      Growth is currently driven by expensive customer acquisition rather than recurring loyalty.
+                    </p>
+                    <div className="bg-slate-50 p-4 rounded border border-slate-100 text-sm font-medium text-slate-700">
+                      Recommendation: Implement a Tier-based loyalty program specifically targeting Tier 3 to Tier 2 conversion.
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Insight 2 */}
+              <div className="bg-white p-8 rounded-lg border border-slate-200 shadow-sm">
+                <div className="flex items-start space-x-4">
+                  <div className="p-3 bg-indigo-100 rounded-full text-indigo-600">
+                    <MapIcon size={24} />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-xl font-bold text-slate-900 mb-2">Geographic Dependency</h3>
+                    <p className="text-slate-600 mb-4">
+                      São Paulo (SP) represents <strong>18.5%</strong> of total platform revenue. 
+                      The business is a regional giant with significant untapped potential in the Northern territories.
+                    </p>
+                    <div className="bg-slate-50 p-4 rounded border border-slate-100 text-sm font-medium text-slate-700">
+                      Recommendation: Optimize logistics corridors in the North-East to reduce shipping friction for remote customers.
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Insight 3 */}
+              <div className="bg-white p-8 rounded-lg border border-slate-200 shadow-sm">
+                <div className="flex items-start space-x-4">
+                  <div className="p-3 bg-amber-100 rounded-full text-amber-600">
+                    <BarChart3 size={24} />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-xl font-bold text-slate-900 mb-2">The VIP Whale Principle</h3>
+                    <p className="text-slate-600 mb-4">
+                      Tier 1 customers represent less than 1% of the base but contribute <strong>12.4%</strong> of total revenue. 
+                      A tiny loss in this segment is more damaging than a large loss in Tier 3.
+                    </p>
+                    <div className="bg-slate-50 p-4 rounded border border-slate-100 text-sm font-medium text-slate-700">
+                      Recommendation: Deploy personalized "Concierge" marketing and exclusive early access for Tier 1 users.
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         )}
