@@ -1,9 +1,10 @@
 from fastapi import FastAPI
 import sqlite3
 import pandas as pd
+import os
 from fastapi.middleware.cors import CORSMiddleware
 
-app = FastAPI(title="Olist Big Data Showcase API")
+app = FastAPI(title="Analytics API")
 
 # Enable CORS for React frontend
 app.add_middleware(
@@ -13,7 +14,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-DB_PATH = "/home/margarine/Documents/c/gemini/olist-showcase/backend/data/olist_analytics.db"
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DB_PATH = os.path.join(BASE_DIR, "data", "olist_analytics.db")
 
 @app.get("/api/v1/kpi")
 def get_kpis():
@@ -43,19 +45,6 @@ def get_geospatial():
     df = pd.read_sql("SELECT customer_state, SUM(payment_value) as value FROM analytics_base GROUP BY customer_state", conn)
     conn.close()
     return df.to_dict(orient="records")
-
-@app.get("/api/v1/predict")
-def predict_cluster(transactions: int, payments: float):
-    conn = sqlite3.connect(DB_PATH)
-    df = pd.read_sql("SELECT total_transaction_customer, total_payment_customer, cluster FROM analytics_base", conn)
-    conn.close()
-    
-    # Simple nearest-centroid prediction for the prototype
-    centroids = df.groupby('cluster').mean()
-    distances = ((centroids['total_transaction_customer'] - transactions)**2 + (centroids['total_payment_customer'] - payments)**2)**0.5
-    assigned_cluster = int(distances.idxmin())
-    
-    return {"cluster": assigned_cluster}
 
 if __name__ == "__main__":
     import uvicorn

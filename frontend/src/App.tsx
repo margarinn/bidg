@@ -17,18 +17,16 @@ interface GeoData {
 }
 
 const App: React.FC = () => {
-  const [view, setView] = useState<'dashboard' | 'clusters' | 'geospatial' | 'predict'>('dashboard');
+  const [view, setView] = useState<'dashboard' | 'clusters' | 'geospatial'>('dashboard');
   const [kpi, setKpi] = useState<KPI | null>(null);
   const [clusterData, setClusterData] = useState<any[]>([]);
   const [geoData, setGeoData] = useState<GeoData[]>([]);
   const [mapLoaded, setMapLoaded] = useState(false);
-  const [predictInputs, setPredictInputs] = useState({ trans: 1, pay: 100 });
-  const [prediction, setPrediction] = useState<number | null>(null);
 
   useEffect(() => {
-    axios.get('http://localhost:8000/api/v1/kpi').then(res => setKpi(res.data));
-    axios.get('http://localhost:8000/api/v1/clusters').then(res => setClusterData(res.data));
-    axios.get('http://localhost:8000/api/v1/geospatial').then(res => setGeoData(res.data));
+    axios.get('/api/v1/kpi').then(res => setKpi(res.data));
+    axios.get('/api/v1/clusters').then(res => setClusterData(res.data));
+    axios.get('/api/v1/geospatial').then(res => setGeoData(res.data));
     
     // Load GeoJSON
     fetch('/brazil_states.json')
@@ -39,11 +37,6 @@ const App: React.FC = () => {
       })
       .catch(err => console.error('Map Load Error:', err));
   }, []);
-
-  const handlePredict = () => {
-    axios.get(`http://localhost:8000/api/v1/predict?transactions=${predictInputs.trans}&payments=${predictInputs.pay}`)
-      .then(res => setPrediction(res.data.cluster));
-  };
 
   const geoOption = {
     title: { text: 'Sales Density by State', left: 'center' },
@@ -110,7 +103,7 @@ const App: React.FC = () => {
     <div className="flex h-screen bg-slate-50">
       {/* Sidebar */}
       <aside className="w-64 bg-slate-900 text-white flex flex-col">
-        <div className="p-6 text-xl font-bold border-b border-slate-800">Olist Analytics</div>
+        <div className="p-6 text-xl font-bold border-b border-slate-800">Analytics</div>
         <nav className="flex-1 p-4 space-y-2">
           <div className={navItemClass('dashboard')} onClick={() => setView('dashboard')}>
             <LayoutDashboard size={20} />
@@ -124,10 +117,6 @@ const App: React.FC = () => {
             <MapIcon size={20} />
             <span>Geospatial</span>
           </div>
-          <div className={navItemClass('predict')} onClick={() => setView('predict')}>
-            <Users size={20} />
-            <span>Predictor</span>
-          </div>
         </nav>
         <div className="p-6 border-t border-slate-800 text-xs text-slate-500">
           v1.0.0-corporate
@@ -140,7 +129,7 @@ const App: React.FC = () => {
           <>
             <header className="mb-8">
               <h1 className="text-2xl font-bold text-slate-900">Enterprise Overview</h1>
-              <p className="text-slate-500">Real-time business intelligence for Olist Brazil.</p>
+              <p className="text-slate-500">Real-time business intelligence.</p>
             </header>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -200,53 +189,6 @@ const App: React.FC = () => {
                 <ReactECharts option={geoOption} style={{ height: '100%' }} />
               ) : (
                 <div className="flex items-center justify-center h-full text-slate-400">Loading Map...</div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {view === 'predict' && (
-          <div className="max-w-2xl mx-auto">
-            <header className="mb-8">
-              <h1 className="text-2xl font-bold text-slate-900">Predictive Segmenter</h1>
-              <p className="text-slate-500">Input customer metrics to predict behavioral cluster.</p>
-            </header>
-            <div className="bg-white p-8 rounded-lg border border-slate-200 shadow-sm">
-              <div className="space-y-6">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Total Transactions</label>
-                  <input 
-                    type="number" 
-                    value={predictInputs.trans}
-                    onChange={(e) => setPredictInputs({...predictInputs, trans: parseInt(e.target.value)})}
-                    className="w-full p-3 border border-slate-200 rounded focus:ring-2 focus:ring-indigo-500 outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Total Payment Value ($)</label>
-                  <input 
-                    type="number" 
-                    value={predictInputs.pay}
-                    onChange={(e) => setPredictInputs({...predictInputs, pay: parseFloat(e.target.value)})}
-                    className="w-full p-3 border border-slate-200 rounded focus:ring-2 focus:ring-indigo-500 outline-none"
-                  />
-                </div>
-                <button 
-                  onClick={handlePredict}
-                  className="w-full bg-indigo-600 text-white p-4 rounded font-bold hover:bg-indigo-700 transition"
-                >
-                  Analyze Customer Profile
-                </button>
-              </div>
-
-              {prediction !== null && (
-                <div className="mt-8 p-6 bg-slate-50 rounded-lg border border-slate-200 text-center">
-                  <div className="text-slate-500 text-sm mb-1">Predicted Cluster</div>
-                  <div className="text-4xl font-bold text-indigo-600">Segment {prediction}</div>
-                  <div className="mt-2 text-sm text-slate-400">
-                    {prediction === 2 ? 'VIP High-Value Customer' : prediction === 1 ? 'Loyal Emerging Customer' : 'Standard Frequency Customer'}
-                  </div>
-                </div>
               )}
             </div>
           </div>
