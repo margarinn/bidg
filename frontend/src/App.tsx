@@ -89,26 +89,26 @@ const App: React.FC = () => {
   const scatterOption = {
     title: { text: 'Customer Segmentation (K-Means)', left: 'center' },
     tooltip: { trigger: 'item' },
-    legend: { bottom: '0', data: ['Standard', 'Emerging', 'VIP'] },
+    legend: { bottom: '0', data: ['Tier 1', 'Tier 2', 'Tier 3'] },
     xAxis: { name: 'Transactions', type: 'value' },
     yAxis: { name: 'Payments', type: 'value' },
     series: [
       {
-        name: 'Standard',
+        name: 'Tier 3',
         symbolSize: 5,
         data: Array.isArray(clusterData) ? clusterData.filter(d => d.cluster === 0).map(d => [d.total_transaction_customer, d.total_payment_customer]) : [],
         type: 'scatter',
         itemStyle: { color: '#3b82f6' } // Blue-500
       },
       {
-        name: 'Emerging',
+        name: 'Tier 2',
         symbolSize: 5,
         data: Array.isArray(clusterData) ? clusterData.filter(d => d.cluster === 1).map(d => [d.total_transaction_customer, d.total_payment_customer]) : [],
         type: 'scatter',
         itemStyle: { color: '#64748b' } // Slate-500
       },
       {
-        name: 'VIP',
+        name: 'Tier 1',
         symbolSize: 5,
         data: Array.isArray(clusterData) ? clusterData.filter(d => d.cluster === 2).map(d => [d.total_transaction_customer, d.total_payment_customer]) : [],
         type: 'scatter',
