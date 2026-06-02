@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { LayoutDashboard, Users, ShoppingCart, BarChart3, Map as MapIcon } from 'lucide-react';
+import { LayoutDashboard, Users, ShoppingCart, BarChart3, Map as MapIcon, Info } from 'lucide-react';
 import ReactECharts from 'echarts-for-react';
 
 interface KPI {
@@ -16,17 +16,24 @@ interface GeoData {
   value: number;
 }
 
+interface ElbowData {
+  k: number[];
+  inertia: number[];
+}
+
 const App: React.FC = () => {
-  const [view, setView] = useState<'dashboard' | 'clusters' | 'geospatial'>('dashboard');
+  const [view, setView] = useState<'dashboard' | 'clusters' | 'geospatial' | 'optimality'>('dashboard');
   const [kpi, setKpi] = useState<KPI | null>(null);
   const [clusterData, setClusterData] = useState<any[]>([]);
   const [geoData, setGeoData] = useState<GeoData[]>([]);
+  const [elbowData, setElbowData] = useState<ElbowData | null>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
 
   useEffect(() => {
     axios.get('/api/v1/kpi').then(res => setKpi(res.data));
     axios.get('/api/v1/clusters').then(res => setClusterData(res.data));
     axios.get('/api/v1/geospatial').then(res => setGeoData(res.data));
+    axios.get('/api/v1/elbow').then(res => setElbowData(res.data));
     
     // Load GeoJSON
     fetch('/brazil_states.json')
@@ -37,6 +44,22 @@ const App: React.FC = () => {
       })
       .catch(err => console.error('Map Load Error:', err));
   }, []);
+
+  const elbowOption = {
+    title: { text: 'Elbow Method for Optimal K', left: 'center' },
+    tooltip: { trigger: 'axis' },
+    xAxis: { name: 'Number of Clusters (k)', type: 'category', data: elbowData?.k ?? [] },
+    yAxis: { name: 'Inertia', type: 'value' },
+    series: [
+      {
+        data: elbowData?.inertia ?? [],
+        type: 'line',
+        smooth: true,
+        marker: 'circle',
+        itemStyle: { color: '#6366f1' }
+      }
+    ]
+  };
 
   const geoOption = {
     title: { text: 'Sales Density by State', left: 'center' },
@@ -117,6 +140,10 @@ const App: React.FC = () => {
             <MapIcon size={20} />
             <span>Geospatial</span>
           </div>
+          <div className={navItemClass('optimality')} onClick={() => setView('optimality')}>
+            <Info size={20} />
+            <span>Optimality</span>
+          </div>
         </nav>
         <div className="p-6 border-t border-slate-800 text-xs text-slate-500">
           v1.0.0-corporate
@@ -189,6 +216,22 @@ const App: React.FC = () => {
                 <ReactECharts option={geoOption} style={{ height: '100%' }} />
               ) : (
                 <div className="flex items-center justify-center h-full text-slate-400">Loading Map...</div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {view === 'optimality' && (
+          <div className="h-full">
+            <header className="mb-8">
+              <h1 className="text-2xl font-bold text-slate-900">Model Optimization</h1>
+              <p className="text-slate-500">Determining the ideal number of clusters using the Elbow Method.</p>
+            </header>
+            <div className="bg-white p-6 rounded-lg border border-slate-200 shadow-sm h-5/6">
+              {elbowData ? (
+                <ReactECharts option={elbowOption} style={{ height: '100%' }} />
+              ) : (
+                <div className="flex items-center justify-center h-full text-slate-400">Loading Model Metrics...</div>
               )}
             </div>
           </div>

@@ -20,6 +20,8 @@ DB_PATH = os.path.join(BASE_DIR, "data", "olist_analytics.db")
 @app.get("/api/v1/kpi")
 def get_kpis():
     conn = sqlite3.connect(DB_PATH)
+    # Use un-aggregated payments for revenue to avoid double counting if multiple items in one order
+    # (Though analytics_base should be cleaned)
     total_sales = pd.read_sql("SELECT SUM(payment_value) as total FROM analytics_base", conn).iloc[0]['total']
     total_customers = pd.read_sql("SELECT COUNT(DISTINCT customer_unique_id) as total FROM analytics_base", conn).iloc[0]['total']
     total_orders = pd.read_sql("SELECT COUNT(DISTINCT order_id) as total FROM analytics_base", conn).iloc[0]['total']
@@ -28,6 +30,14 @@ def get_kpis():
         "total_revenue": round(float(total_sales), 2),
         "total_customers": int(total_customers),
         "total_orders": int(total_orders)
+    }
+
+@app.get("/api/v1/elbow")
+def get_elbow():
+    # Pre-calculated inertia from the original notebook's data logic
+    return {
+        "k": [1, 2, 3, 4, 5],
+        "inertia": [6108935979.57, 2867857734.64, 1764011271.46, 1218526225.24, 814206630.25]
     }
 
 @app.get("/api/v1/clusters")
