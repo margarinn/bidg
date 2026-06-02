@@ -20,16 +20,32 @@ DB_PATH = os.path.join(BASE_DIR, "data", "olist_analytics.db")
 @app.get("/api/v1/kpi")
 def get_kpis():
     conn = sqlite3.connect(DB_PATH)
-    # Use un-aggregated payments for revenue to avoid double counting if multiple items in one order
-    # (Though analytics_base should be cleaned)
     total_sales = pd.read_sql("SELECT SUM(payment_value) as total FROM analytics_base", conn).iloc[0]['total']
     total_customers = pd.read_sql("SELECT COUNT(DISTINCT customer_unique_id) as total FROM analytics_base", conn).iloc[0]['total']
     total_orders = pd.read_sql("SELECT COUNT(DISTINCT order_id) as total FROM analytics_base", conn).iloc[0]['total']
+    
+    # Revenue by Tier (Cluster 0=Tier 3, 1=Tier 2, 2=Tier 1)
+    rev_tier = pd.read_sql("SELECT cluster, SUM(payment_value) as value FROM analytics_base GROUP BY cluster", conn)
+    rev_mapping = {0: "Tier 3", 1: "Tier 2", 2: "Tier 1"}
+    rev_tier['name'] = rev_tier['cluster'].map(rev_mapping)
+    
+    # Loyalty Split (One-time vs Recurring)
+    # total_transaction_customer == 1 are one-time
+    loyalty = pd.read_sql("""
+        SELECT 
+            CASE WHEN total_transaction_customer == 1 THEN 'One-time' ELSE 'Recurring' END as status,
+            COUNT(DISTINCT customer_unique_id) as count
+        FROM analytics_base
+        GROUP BY status
+    """, conn)
+    
     conn.close()
     return {
         "total_revenue": round(float(total_sales), 2),
         "total_customers": int(total_customers),
-        "total_orders": int(total_orders)
+        "total_orders": int(total_orders),
+        "revenue_by_tier": rev_tier[['name', 'value']].to_dict(orient="records"),
+        "loyalty_split": loyalty.to_dict(orient="records")
     }
 
 @app.get("/api/v1/elbow")

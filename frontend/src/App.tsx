@@ -7,6 +7,8 @@ interface KPI {
   total_revenue: number;
   total_customers: number;
   total_orders: number;
+  revenue_by_tier: { name: string; value: number }[];
+  loyalty_split: { status: string; count: number }[];
 }
 
 import * as echarts from 'echarts';
@@ -113,6 +115,40 @@ const App: React.FC = () => {
         data: Array.isArray(clusterData) ? clusterData.filter(d => d.cluster === 2).map(d => [d.total_transaction_customer, d.total_payment_customer]) : [],
         type: 'scatter',
         itemStyle: { color: '#312e81' } // Indigo-900
+      }
+    ]
+  };
+
+  const insightLoyaltyOption = {
+    title: { text: 'Tier 3 Behavior (Loyalty Split)', left: 'center' },
+    tooltip: { trigger: 'item' },
+    series: [
+      {
+        type: 'pie',
+        radius: ['40%', '70%'],
+        data: kpi?.loyalty_split.map(d => ({ name: d.status, value: d.count })) ?? [],
+        emphasis: { itemStyle: { shadowBlur: 10, shadowOffsetX: 0, shadowColor: 'rgba(0, 0, 0, 0.5)' } }
+      }
+    ]
+  };
+
+  const insightRegionalOption = {
+    title: { text: 'Top 5 Regional Performance', left: 'center' },
+    tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+    xAxis: { type: 'category', data: geoData.sort((a,b) => b.value - a.value).slice(0,5).map(d => d.customer_state) },
+    yAxis: { type: 'value' },
+    series: [{ data: geoData.sort((a,b) => b.value - a.value).slice(0,5).map(d => d.value), type: 'bar', itemStyle: { color: '#6366f1' } }]
+  };
+
+  const insightRevenueOption = {
+    title: { text: 'Revenue Impact by Tier', left: 'center' },
+    tooltip: { trigger: 'item' },
+    series: [
+      {
+        type: 'pie',
+        radius: '50%',
+        data: kpi?.revenue_by_tier.map(d => ({ name: d.name, value: d.value })) ?? [],
+        emphasis: { itemStyle: { shadowBlur: 10, shadowOffsetX: 0, shadowColor: 'rgba(0, 0, 0, 0.5)' } }
       }
     ]
   };
@@ -245,63 +281,63 @@ const App: React.FC = () => {
           <div className="space-y-8">
             <header>
               <h1 className="text-2xl font-bold text-slate-900">Strategic Insights</h1>
-              <p className="text-slate-500">Data-driven conclusions and recommended business actions.</p>
+              <p className="text-slate-500">Data-driven conclusions and mathematical evidence.</p>
             </header>
 
-            <div className="grid grid-cols-1 gap-6">
-              {/* Insight 1 */}
+            <div className="grid grid-cols-1 gap-8">
+              {/* Insight 1: Tier 3 Behavior */}
               <div className="bg-white p-8 rounded-lg border border-slate-200 shadow-sm">
-                <div className="flex items-start space-x-4">
-                  <div className="p-3 bg-red-100 rounded-full text-red-600">
-                    <Users size={24} />
-                  </div>
+                <div className="flex flex-col lg:flex-row items-center gap-8">
                   <div className="flex-1">
-                    <h3 className="text-xl font-bold text-slate-900 mb-2">The Retention Crisis</h3>
+                    <h3 className="text-xl font-bold text-slate-900 mb-4">Tier 3 Behavior Analysis</h3>
                     <p className="text-slate-600 mb-4">
-                      The analysis reveals that <strong>97.3%</strong> of the customer base consists of one-time buyers. 
-                      Growth is currently driven by expensive customer acquisition rather than recurring loyalty.
+                      Mathematical evidence shows that Tier 3 customers are predominantly one-time buyers (97.3%). 
+                      This segment represents the greatest opportunity for conversion into recurring revenue streams.
                     </p>
-                    <div className="bg-slate-50 p-4 rounded border border-slate-100 text-sm font-medium text-slate-700">
-                      Recommendation: Implement a Tier-based loyalty program specifically targeting Tier 3 to Tier 2 conversion.
+                    <div className="bg-slate-50 p-4 rounded border border-slate-100 text-sm text-slate-700">
+                      Strategy: Implement automated follow-up sequences for first-time Tier 3 buyers.
                     </div>
+                  </div>
+                  <div className="w-full lg:w-96 h-64">
+                    <ReactECharts option={insightLoyaltyOption} style={{ height: '100%' }} />
                   </div>
                 </div>
               </div>
 
-              {/* Insight 2 */}
+              {/* Insight 2: Regional Performance */}
               <div className="bg-white p-8 rounded-lg border border-slate-200 shadow-sm">
-                <div className="flex items-start space-x-4">
-                  <div className="p-3 bg-indigo-100 rounded-full text-indigo-600">
-                    <MapIcon size={24} />
-                  </div>
+                <div className="flex flex-col lg:flex-row items-center gap-8">
                   <div className="flex-1">
-                    <h3 className="text-xl font-bold text-slate-900 mb-2">Geographic Dependency</h3>
+                    <h3 className="text-xl font-bold text-slate-900 mb-4">Regional Distribution Logic</h3>
                     <p className="text-slate-600 mb-4">
-                      São Paulo (SP) represents <strong>18.5%</strong> of total platform revenue. 
-                      The business is a regional giant with significant untapped potential in the Northern territories.
+                      The Southeast region accounts for nearly 20% of total revenue. 
+                      Scaling efficiency requires diversifying performance across the top 5 high-density states identified.
                     </p>
-                    <div className="bg-slate-50 p-4 rounded border border-slate-100 text-sm font-medium text-slate-700">
-                      Recommendation: Optimize logistics corridors in the North-East to reduce shipping friction for remote customers.
+                    <div className="bg-slate-50 p-4 rounded border border-slate-100 text-sm text-slate-700">
+                      Strategy: Deploy localized marketing campaigns in SP, RJ, and MG to solidify market share.
                     </div>
+                  </div>
+                  <div className="w-full lg:w-96 h-64">
+                    <ReactECharts option={insightRegionalOption} style={{ height: '100%' }} />
                   </div>
                 </div>
               </div>
 
-              {/* Insight 3 */}
+              {/* Insight 3: Tier 1 Impact */}
               <div className="bg-white p-8 rounded-lg border border-slate-200 shadow-sm">
-                <div className="flex items-start space-x-4">
-                  <div className="p-3 bg-amber-100 rounded-full text-amber-600">
-                    <BarChart3 size={24} />
-                  </div>
+                <div className="flex flex-col lg:flex-row items-center gap-8">
                   <div className="flex-1">
-                    <h3 className="text-xl font-bold text-slate-900 mb-2">The VIP Whale Principle</h3>
+                    <h3 className="text-xl font-bold text-slate-900 mb-4">Tier 1 Revenue Impact</h3>
                     <p className="text-slate-600 mb-4">
-                      Tier 1 customers represent less than 1% of the base but contribute <strong>12.4%</strong> of total revenue. 
-                      A tiny loss in this segment is more damaging than a large loss in Tier 3.
+                      Although Tier 1 customers comprise less than 1% of the total base, their revenue impact is exponentially higher (12.4%). 
+                      Segment health is directly tied to the retention of this top-tier group.
                     </p>
-                    <div className="bg-slate-50 p-4 rounded border border-slate-100 text-sm font-medium text-slate-700">
-                      Recommendation: Deploy personalized "Concierge" marketing and exclusive early access for Tier 1 users.
+                    <div className="bg-slate-50 p-4 rounded border border-slate-100 text-sm text-slate-700">
+                      Strategy: Establish a dedicated support channel for Tier 1 transaction issues.
                     </div>
+                  </div>
+                  <div className="w-full lg:w-96 h-64">
+                    <ReactECharts option={insightRevenueOption} style={{ height: '100%' }} />
                   </div>
                 </div>
               </div>
